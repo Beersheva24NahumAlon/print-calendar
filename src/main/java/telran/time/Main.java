@@ -93,7 +93,7 @@ public class Main {
     private static int getLastDayOfMonth(MonthYear monthYear) {
         int month = monthYear.month();
         int year = monthYear.year();
-        LocalDate nextMonthFirstDay = month == 12 ? LocalDate.of(year + 1, 1, 1) : LocalDate.of(year, month + 1, 1);
+        LocalDate nextMonthFirstDay = (month == 12) ? LocalDate.of(year + 1, 1, 1) : LocalDate.of(year, month + 1, 1);
         return (nextMonthFirstDay.minus(1, ChronoUnit.DAYS)).get(ChronoField.DAY_OF_MONTH);
     }
 }
