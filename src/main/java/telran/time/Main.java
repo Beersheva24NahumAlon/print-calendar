@@ -12,6 +12,11 @@ record MonthYear(int month, int year) {
 }
 
 public class Main {
+    private static final int DAYS_IN_WEEK = 7;
+    private static final int MONTHS_IN_YEAR = 12;
+    
+    private static int offset = -1;
+    
     public static void main(String[] args) {
         try {
             MonthYear monthYear = getMonthYear(args);
@@ -38,7 +43,7 @@ public class Main {
         for (int i = 1; i <= getLastDayOfMonth(monthYear); i++) {
             System.out.printf("%4d", i);
             current++;
-            if (current > 7) {
+            if (current > DAYS_IN_WEEK) {
                 System.out.println();
                 current = 1;
             }
@@ -47,8 +52,8 @@ public class Main {
     }
 
     private static void printWeekDays(MonthYear monthYear) {
-        for (int i = 1; i <= 7; i++) {
-            System.out.printf("%4s", DayOfWeek.of(i).getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
+        for (int i = 1; i <= DAYS_IN_WEEK; i++) {
+            System.out.printf("%4s", DayOfWeek.of(getDifferentDayOfWeek(i, offset)).getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
         }
         System.out.println();
     }
@@ -87,13 +92,24 @@ public class Main {
     }
 
     private static int getOffset(DayOfWeek dayOfWeek) {
-        return dayOfWeek.getValue() - 1;
+        return dayOfWeek.getValue() - offset - 1;
     }
 
     private static int getLastDayOfMonth(MonthYear monthYear) {
         int month = monthYear.month();
         int year = monthYear.year();
-        LocalDate nextMonthFirstDay = (month == 12) ? LocalDate.of(year + 1, 1, 1) : LocalDate.of(year, month + 1, 1);
+        LocalDate nextMonthFirstDay = (month == MONTHS_IN_YEAR) ? LocalDate.of(year + 1, 1, 1) : LocalDate.of(year, month + 1, 1);
         return (nextMonthFirstDay.minus(1, ChronoUnit.DAYS)).get(ChronoField.DAY_OF_MONTH);
+    }
+
+    private static int getDifferentDayOfWeek(int day, int offset) {
+        int result = day + offset;
+        if (result > DAYS_IN_WEEK) {
+            result = result - DAYS_IN_WEEK;
+        }
+        if (result < 1) {
+            result = DAYS_IN_WEEK + result;
+        }
+        return result;
     }
 }
