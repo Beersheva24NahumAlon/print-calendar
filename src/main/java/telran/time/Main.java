@@ -13,13 +13,15 @@ record Parameters(int month, int year, int firstDayOfWeekNumber) {
 
 // Application can be used in a few modes:
 // 1. Without parametrs: current month and year, first day of week - monday
-// 2. With 2 parametrs: first parametr - year, second - month, first day of week - monday 
-// 3. With 3 parametrs: first parametr - year, second - month, third - first day of week
+// 2. With 2 parametrs: first parametr - year, second - month, first day of week
+// - monday
+// 3. With 3 parametrs: first parametr - year, second - month, third - first day
+// of week
 
 public class Main {
     private static final int DAYS_IN_WEEK = 7;
     private static final int MONTHS_IN_YEAR = 12;
-    
+
     public static void main(String[] args) {
         try {
             Parameters parameters = getParameters(args);
@@ -55,13 +57,15 @@ public class Main {
 
     private static void printWeekDays(Parameters parameters) {
         for (int i = 1; i <= DAYS_IN_WEEK; i++) {
-            System.out.printf("%4s", DayOfWeek.of(getDayOfWeekInAnotherWeek(i, parameters.firstDayOfWeekNumber())).getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
+            System.out.printf("%4s", DayOfWeek.of(getDayOfWeekInAnotherWeek(i, parameters.firstDayOfWeekNumber()))
+                    .getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
         }
         System.out.println();
     }
 
     private static void printTitle(Parameters parameters) {
-        System.out.printf(" %4d %22s\n", parameters.year(), Month.of(parameters.month()).getDisplayName(TextStyle.FULL_STANDALONE, Locale.ENGLISH));
+        System.out.printf(" %4d %22s\n", parameters.year(),
+                Month.of(parameters.month()).getDisplayName(TextStyle.FULL_STANDALONE, Locale.ENGLISH));
     }
 
     private static Parameters getParameters(String[] args) throws Exception {
@@ -72,33 +76,42 @@ public class Main {
         if (args.length == 1 || args.length > 3) {
             throw new Exception("You can use tha application with 2, 3 or without parametrs!");
         }
-        if (args.length == 2 || args.length == 3) {
+        if (args.length > 0) {
             try {
-                for (int i = 0; i < args.length; i++) {
-                    if (i == 0) {
-                        year = Integer.valueOf(args[i]);
-                    }
-                    if (i == 1) {
-                        month = Integer.valueOf(args[i]);
-                    }
-                    if (i == 2) {
-                        firstDayOfWeekNumber = Integer.valueOf(args[i]);
-                    }
-                }                                
+                year = getYearFromParameters(args);
+                month = getMonthFromParameters(args);
+                if (args.length == 3) {
+                    firstDayOfWeekNumber = getFirstDayFromParameters(args);
+                }
             } catch (NumberFormatException e) {
                 throw new Exception("Year or month must be numbers!");
             }
         }
+        return new Parameters(month, year, firstDayOfWeekNumber);
+    }
+
+    private static int getYearFromParameters(String[] args) throws Exception {
+        int year = Integer.valueOf(args[0]);
         if (year <= 0) {
             throw new Exception("Year must be grater than 0!");
         }
+        return year;
+    }
+
+    private static int getMonthFromParameters(String[] args) throws Exception {
+        int month = Integer.valueOf(args[1]);
         if (month < 1 || month > MONTHS_IN_YEAR) {
             throw new Exception(String.format("Month must be in range from 1 to %d!", MONTHS_IN_YEAR));
         }
+        return month;
+    }
+
+    private static int getFirstDayFromParameters(String[] args) throws Exception {
+        int firstDayOfWeekNumber = Integer.valueOf(args[2]);
         if (firstDayOfWeekNumber < 1 || firstDayOfWeekNumber > DAYS_IN_WEEK) {
             throw new Exception(String.format("Firts day of week must be in range from 1 to %d!", DAYS_IN_WEEK));
         }
-        return new Parameters(month, year, firstDayOfWeekNumber);
+        return firstDayOfWeekNumber;
     }
 
     private static DayOfWeek getWeekdayFirstOfMonth(Parameters parameters) {
@@ -113,11 +126,12 @@ public class Main {
     private static int getLastDayOfMonth(Parameters parameters) {
         int month = parameters.month();
         int year = parameters.year();
-        LocalDate nextMonthFirstDay = (month == MONTHS_IN_YEAR) ? LocalDate.of(year + 1, 1, 1) : LocalDate.of(year, month + 1, 1);
+        LocalDate nextMonthFirstDay = (month == MONTHS_IN_YEAR) ? LocalDate.of(year + 1, 1, 1)
+                : LocalDate.of(year, month + 1, 1);
         return (nextMonthFirstDay.minus(1, ChronoUnit.DAYS)).get(ChronoField.DAY_OF_MONTH);
     }
 
-    private static int getDayOfWeekInAnotherWeek(int day, int firstDayOfWeekNumber) { 
+    private static int getDayOfWeekInAnotherWeek(int day, int firstDayOfWeekNumber) {
         int result = day + firstDayOfWeekNumber - 1;
         return result > DAYS_IN_WEEK ? result - DAYS_IN_WEEK : result;
     }
