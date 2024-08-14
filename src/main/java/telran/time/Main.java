@@ -8,7 +8,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
-record Parametrs(int month, int year, int firstDayOfWeekNumber) {
+record Parameters(int month, int year, int firstDayOfWeekNumber) {
 }
 
 // Application can be used in a few modes:
@@ -22,8 +22,8 @@ public class Main {
     
     public static void main(String[] args) {
         try {
-            Parametrs parametrs = getParametrs(args);
-            printCalendar(parametrs);
+            Parameters parameters = getParameters(args);
+            printCalendar(parameters);
         } catch (RuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -31,19 +31,19 @@ public class Main {
         }
     }
 
-    private static void printCalendar(Parametrs parametrs) {
-        printTitle(parametrs);
-        printWeekDays(parametrs);
-        printDates(parametrs);
+    private static void printCalendar(Parameters parameters) {
+        printTitle(parameters);
+        printWeekDays(parameters);
+        printDates(parameters);
     }
 
-    private static void printDates(Parametrs parametrs) {
+    private static void printDates(Parameters parameters) {
         int current = 1;
-        for (int i = 1; i <= getOffset(getFirstDayOfWeek(parametrs), parametrs); i++) {
+        for (int i = 1; i <= getCountOfGaps(getWeekdayFirstOfMonth(parameters), parameters); i++) {
             System.out.print("    ");
             current++;
         }
-        for (int i = 1; i <= getLastDayOfMonth(parametrs); i++) {
+        for (int i = 1; i <= getLastDayOfMonth(parameters); i++) {
             System.out.printf("%4d", i);
             current++;
             if (current > DAYS_IN_WEEK) {
@@ -51,21 +51,20 @@ public class Main {
                 current = 1;
             }
         }
-        System.out.println();
     }
 
-    private static void printWeekDays(Parametrs parametrs) {
+    private static void printWeekDays(Parameters parameters) {
         for (int i = 1; i <= DAYS_IN_WEEK; i++) {
-            System.out.printf("%4s", DayOfWeek.of(getDifferentDayOfWeek(i, parametrs.firstDayOfWeekNumber())).getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
+            System.out.printf("%4s", DayOfWeek.of(getDayOfWeekInAnotherWeek(i, parameters.firstDayOfWeekNumber())).getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
         }
         System.out.println();
     }
 
-    private static void printTitle(Parametrs parametrs) {
-        System.out.printf(" %4d %22s\n", parametrs.year(), Month.of(parametrs.month()).toString());
+    private static void printTitle(Parameters parameters) {
+        System.out.printf(" %4d %22s\n", parameters.year(), Month.of(parameters.month()).getDisplayName(TextStyle.FULL_STANDALONE, Locale.ENGLISH));
     }
 
-    private static Parametrs getParametrs(String[] args) throws Exception {
+    private static Parameters getParameters(String[] args) throws Exception {
         LocalDate now = LocalDate.now();
         int month = now.get(ChronoField.MONTH_OF_YEAR);
         int year = now.get(ChronoField.YEAR);
@@ -99,26 +98,26 @@ public class Main {
         if (firstDayOfWeekNumber < 1 || firstDayOfWeekNumber > DAYS_IN_WEEK) {
             throw new Exception(String.format("Firts day of week must be in range from 1 to %d!", DAYS_IN_WEEK));
         }
-        return new Parametrs(month, year, firstDayOfWeekNumber);
+        return new Parameters(month, year, firstDayOfWeekNumber);
     }
 
-    private static DayOfWeek getFirstDayOfWeek(Parametrs parametrs) {
-        LocalDate firstDay = LocalDate.of(parametrs.year(), parametrs.month(), 1);
+    private static DayOfWeek getWeekdayFirstOfMonth(Parameters parameters) {
+        LocalDate firstDay = LocalDate.of(parameters.year(), parameters.month(), 1);
         return DayOfWeek.of(firstDay.get(ChronoField.DAY_OF_WEEK));
     }
 
-    private static int getOffset(DayOfWeek dayOfWeek, Parametrs parametrs) {
-        return DAYS_IN_WEEK - getDifferentDayOfWeek(dayOfWeek.getValue(), parametrs.firstDayOfWeekNumber());
+    private static int getCountOfGaps(DayOfWeek dayOfWeek, Parameters parameters) {
+        return DAYS_IN_WEEK - getDayOfWeekInAnotherWeek(dayOfWeek.getValue(), parameters.firstDayOfWeekNumber());
     }
 
-    private static int getLastDayOfMonth(Parametrs parametrs) {
-        int month = parametrs.month();
-        int year = parametrs.year();
+    private static int getLastDayOfMonth(Parameters parameters) {
+        int month = parameters.month();
+        int year = parameters.year();
         LocalDate nextMonthFirstDay = (month == MONTHS_IN_YEAR) ? LocalDate.of(year + 1, 1, 1) : LocalDate.of(year, month + 1, 1);
         return (nextMonthFirstDay.minus(1, ChronoUnit.DAYS)).get(ChronoField.DAY_OF_MONTH);
     }
 
-    private static int getDifferentDayOfWeek(int day, int firstDayOfWeekNumber) { 
+    private static int getDayOfWeekInAnotherWeek(int day, int firstDayOfWeekNumber) { 
         int result = day + firstDayOfWeekNumber - 1;
         return result > DAYS_IN_WEEK ? result - DAYS_IN_WEEK : result;
     }
