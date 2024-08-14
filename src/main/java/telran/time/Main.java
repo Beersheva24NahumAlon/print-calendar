@@ -84,7 +84,7 @@ public class Main {
                     firstDayOfWeekNumber = getFirstDayFromParameters(args);
                 }
             } catch (NumberFormatException e) {
-                throw new Exception("Year or month must be numbers!");
+                throw new Exception("Year, month or first day of week must be numbers!");
             }
         }
         return new Parameters(month, year, firstDayOfWeekNumber);
