@@ -108,7 +108,7 @@ public class Main {
     }
 
     private static int getOffset(DayOfWeek dayOfWeek, Parametrs parametrs) {
-        return getDifferentDayOfWeek(dayOfWeek.getValue(), parametrs.firstDayOfWeekNumber()) - 1;
+        return DAYS_IN_WEEK - getDifferentDayOfWeek(dayOfWeek.getValue(), parametrs.firstDayOfWeekNumber());
     }
 
     private static int getLastDayOfMonth(Parametrs parametrs) {
@@ -120,12 +120,6 @@ public class Main {
 
     private static int getDifferentDayOfWeek(int day, int firstDayOfWeekNumber) { 
         int result = day + firstDayOfWeekNumber - 1;
-        if (result > DAYS_IN_WEEK) {
-            result = result - DAYS_IN_WEEK;
-        }
-        if (result < 1) {
-            result = result + DAYS_IN_WEEK;
-        }
-        return result;
+        return result > DAYS_IN_WEEK ? result - DAYS_IN_WEEK : result;
     }
 }
